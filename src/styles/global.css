@@ -78,6 +78,7 @@ body {
   flex: 1;
   padding: 16px;
   gap: 16px;
+  position: relative;
 }
 
 .library-panel {
@@ -93,6 +94,29 @@ body {
   max-height: calc(100vh - 140px);
   position: sticky;
   top: 84px;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    max-height 0.3s ease,
+    padding 0.3s ease,
+    margin 0.3s ease;
+  will-change: opacity, transform, max-height;
+}
+
+.library-panel.is-closed {
+  opacity: 0;
+  transform: translateX(-24px);
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  border-width: 0;
+  overflow: hidden;
 }
 
 .library-header {
@@ -386,7 +410,17 @@ body {
 }
 
 .app-shell.focus .library-panel {
-  display: none;
+  opacity: 0;
+  transform: translateX(-24px);
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  border-width: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 960px) {
@@ -398,6 +432,17 @@ body {
     position: static;
     width: 100%;
     max-height: none;
+    transform: translateY(0);
+  }
+
+  .library-panel.is-closed {
+    transform: translateY(-12px);
+    left: 0;
+    right: 0;
+  }
+
+  .app-shell.focus .library-panel {
+    transform: translateY(-12px);
   }
 
   .content-panel {

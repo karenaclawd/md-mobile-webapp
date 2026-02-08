@@ -5,6 +5,7 @@ type LibraryPanelProps = {
   docs: MarkdownDoc[];
   selectedId: string | null;
   query: string;
+  isOpen: boolean;
   onQueryChange: (value: string) => void;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
@@ -15,13 +16,14 @@ export default function LibraryPanel({
   docs,
   selectedId,
   query,
+  isOpen,
   onQueryChange,
   onSelect,
   onRemove,
   onImportClick
 }: LibraryPanelProps) {
   return (
-    <aside className="library-panel">
+    <aside className={`library-panel ${isOpen ? "is-open" : "is-closed"}`}>
       <div className="library-header">
         <div>
           <h2>Library</h2>

@@ -110,20 +110,19 @@ export default function App() {
       />
 
       <main className="app-main">
-        {isLibraryOpen ? (
-          <LibraryPanel
-            docs={filteredDocs}
-            selectedId={selectedId}
-            query={query}
-            onQueryChange={setQuery}
-            onSelect={(id) => {
-              setSelectedId(id);
-              setIsLibraryOpen(false);
-            }}
-            onRemove={handleRemove}
-            onImportClick={handleImportClick}
-          />
-        ) : null}
+        <LibraryPanel
+          docs={filteredDocs}
+          selectedId={selectedId}
+          query={query}
+          isOpen={isLibraryOpen}
+          onQueryChange={setQuery}
+          onSelect={(id) => {
+            setSelectedId(id);
+            setIsLibraryOpen(false);
+          }}
+          onRemove={handleRemove}
+          onImportClick={handleImportClick}
+        />
 
         <section className="content-panel">
           {activeDoc ? (

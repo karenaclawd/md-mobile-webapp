@@ -233,10 +233,46 @@ body {
   overflow-x: auto;
 }
 
+.md-pre .md-code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
 .md-code {
   background: rgba(15, 76, 92, 0.1);
   padding: 2px 6px;
   border-radius: 6px;
+}
+
+.md-pre-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.md-pre-wrapper .md-pre {
+  margin: 0;
+}
+
+.md-copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(15, 76, 92, 0.55);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.md-copy-button:hover {
+  transform: translateY(-1px);
+  background: rgba(15, 76, 92, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .md-table {

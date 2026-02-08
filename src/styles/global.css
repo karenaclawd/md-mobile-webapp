@@ -320,8 +320,29 @@ body {
 }
 
 .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--primary-soft);
   color: var(--primary);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-button.is-open {
+  background: var(--primary);
+  color: #fff;
 }
 
 .primary-button {

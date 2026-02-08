@@ -10,6 +10,7 @@ type LibraryPanelProps = {
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
   onImportClick: () => void;
+  onRemoveWelcomeData: () => void;
 };
 
 export default function LibraryPanel({
@@ -20,8 +21,11 @@ export default function LibraryPanel({
   onQueryChange,
   onSelect,
   onRemove,
-  onImportClick
+  onImportClick,
+  onRemoveWelcomeData
 }: LibraryPanelProps) {
+  const hasSampleDocs = docs.some((doc) => doc.source === "sample");
+
   return (
     <aside className={`library-panel ${isOpen ? "is-open" : "is-closed"}`}>
       <div className="library-header">
@@ -29,9 +33,16 @@ export default function LibraryPanel({
           <h2>Library</h2>
           <p>{docs.length} documents</p>
         </div>
-        <button className="ghost-button" onClick={onImportClick}>
-          Add
-        </button>
+        <div className="library-actions">
+          <button className="ghost-button" onClick={onImportClick}>
+            Add
+          </button>
+          {hasSampleDocs && (
+            <button className="ghost-button" onClick={onRemoveWelcomeData}>
+              Remove Welcome Data
+            </button>
+          )}
+        </div>
       </div>
       <label className="search-input">
         <span className="sr-only">Search documents</span>

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import LibraryPanel from "./components/LibraryPanel";
 import MarkdownViewer from "./components/MarkdownViewer";
@@ -7,15 +7,54 @@ import { sampleDocs } from "./data/sampleDocs";
 import { MarkdownDoc } from "./types";
 
 const toId = () => crypto.randomUUID();
+const LOCAL_STORAGE_KEY = "md-mobile-webapp-docs";
+const LOCAL_STORAGE_WELCOME_KEY = "md-mobile-webapp-welcome-removed";
 
 export default function App() {
-  const [docs, setDocs] = useState<MarkdownDoc[]>(sampleDocs);
-  const [selectedId, setSelectedId] = useState<string | null>(sampleDocs[0]?.id ?? null);
+  const [welcomeDataRemoved, setWelcomeDataRemoved] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_WELCOME_KEY);
+      return stored ? JSON.parse(stored) : false;
+    } catch (error) {
+      console.error("Failed to parse stored welcome data removed state:", error);
+      return false;
+    }
+  });
+
+  const [docs, setDocs] = useState<MarkdownDoc[]>(() => {
+    try {
+      const storedDocs = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedDocs) {
+        return JSON.parse(storedDocs);
+      }
+      return welcomeDataRemoved ? [] : sampleDocs;
+    } catch (error) {
+      console.error("Failed to parse stored docs from localStorage:", error);
+      return welcomeDataRemoved ? [] : sampleDocs;
+    }
+  });
+  const [selectedId, setSelectedId] = useState<string | null>(docs[0]?.id ?? null);
   const [query, setQuery] = useState("");
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(docs));
+    } catch (error) {
+      console.error("Failed to save docs to localStorage:", error);
+    }
+  }, [docs]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_WELCOME_KEY, JSON.stringify(welcomeDataRemoved));
+    } catch (error) {
+      console.error("Failed to save welcome data removed state to localStorage:", error);
+    }
+  }, [welcomeDataRemoved]);
 
   const filteredDocs = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -93,6 +132,35 @@ export default function App() {
     setIsDragging(false);
   };
 
+  const handlePaste = useCallback(async (event: ClipboardEvent) => {
+    const text = event.clipboardData?.getData("text/plain");
+    if (text) {
+      event.preventDefault();
+      const title = text.split("\n")[0].substring(0, 50) || "Pasted Document";
+      const newDoc: MarkdownDoc = {
+        id: toId(),
+        title: title,
+        content: text,
+        source: "paste",
+        updatedAt: new Date().toISOString(),
+      };
+      addDocs([newDoc]);
+    }
+  }, [addDocs]);
+
+  useEffect(() => {
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [handlePaste]);
+
+  const handleRemoveWelcomeData = useCallback(() => {
+    setWelcomeDataRemoved(true);
+    setDocs((prev) => prev.filter((doc) => doc.source !== "sample"));
+    setSelectedId(null); // Deselect any potentially selected welcome doc
+  }, []);
+
   return (
     <div
       className={`app-shell ${isFocusMode ? "focus" : ""}`}
@@ -122,6 +190,7 @@ export default function App() {
           }}
           onRemove={handleRemove}
           onImportClick={handleImportClick}
+          onRemoveWelcomeData={handleRemoveWelcomeData}
         />
 
         <section className="content-panel">

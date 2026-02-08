@@ -3,12 +3,14 @@ import Header from "./components/Header";
 import LibraryPanel from "./components/LibraryPanel";
 import MarkdownViewer from "./components/MarkdownViewer";
 import EmptyState from "./components/EmptyState";
+import Onboarding from "./components/Onboarding";
 import { sampleDocs } from "./data/sampleDocs";
 import { MarkdownDoc } from "./types";
 
 const toId = () => crypto.randomUUID();
 const LOCAL_STORAGE_KEY = "md-mobile-webapp-docs";
 const LOCAL_STORAGE_WELCOME_KEY = "md-mobile-webapp-welcome-removed";
+const LOCAL_STORAGE_ONBOARDING_KEY = "md-mobile-webapp-onboarding-complete";
 
 export default function App() {
   const [welcomeDataRemoved, setWelcomeDataRemoved] = useState<boolean>(() => {
@@ -33,6 +35,18 @@ export default function App() {
       return welcomeDataRemoved ? [] : sampleDocs;
     }
   });
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_ONBOARDING_KEY);
+      if (stored !== null) {
+        return JSON.parse(stored);
+      }
+      return welcomeDataRemoved;
+    } catch (error) {
+      console.error("Failed to parse stored onboarding state:", error);
+      return welcomeDataRemoved;
+    }
+  });
   const [selectedId, setSelectedId] = useState<string | null>(docs[0]?.id ?? null);
   const [query, setQuery] = useState("");
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
@@ -55,6 +69,14 @@ export default function App() {
       console.error("Failed to save welcome data removed state to localStorage:", error);
     }
   }, [welcomeDataRemoved]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, JSON.stringify(isOnboardingComplete));
+    } catch (error) {
+      console.error("Failed to save onboarding state to localStorage:", error);
+    }
+  }, [isOnboardingComplete]);
 
   const filteredDocs = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -161,6 +183,13 @@ export default function App() {
     setSelectedId(null); // Deselect any potentially selected welcome doc
   }, []);
 
+  const handleCompleteOnboarding = useCallback((removeExamples: boolean) => {
+    setIsOnboardingComplete(true);
+    if (removeExamples) {
+      handleRemoveWelcomeData();
+    }
+  }, [handleRemoveWelcomeData]);
+
   return (
     <div
       className={`app-shell ${isFocusMode ? "focus" : ""}`}
@@ -209,6 +238,14 @@ export default function App() {
             <h2>Release to load your markdown.</h2>
           </div>
         </div>
+      ) : null}
+
+      {!isOnboardingComplete ? (
+        <Onboarding
+          examples={sampleDocs}
+          onKeepExamples={() => handleCompleteOnboarding(false)}
+          onRemoveExamples={() => handleCompleteOnboarding(true)}
+        />
       ) : null}
 
       <input

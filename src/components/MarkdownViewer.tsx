@@ -89,7 +89,30 @@ const components = {
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => <p className="md-p" {...props} />,
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => <ul className="md-ul" {...props} />,
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => <ol className="md-ol" {...props} />,
-  li: (props: React.HTMLAttributes<HTMLLIElement>) => <li className="md-li" {...props} />,
+  li: (props: React.HTMLAttributes<HTMLLIElement>) => {
+    const { children, ...rest } = props;
+    const checkbox = React.Children.toArray(children).find(
+      (child) =>
+        React.isValidElement(child) &&
+        child.props &&
+        (child.props["data-checked"] === true ||
+          child.props["data-checked"] === false)
+    );
+
+    if (checkbox && React.isValidElement(checkbox)) {
+      return (
+        <li className="md-li-task" {...rest}>
+          <input
+            type="checkbox"
+            checked={checkbox.props["data-checked"]}
+            readOnly
+          />
+          {checkbox.props.children}
+        </li>
+      );
+    }
+    return <li className="md-li" {...rest}>{children}</li>;
+  },
   blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
     <blockquote className="md-quote" {...props} />
   ),
@@ -98,7 +121,11 @@ const components = {
   ),
   code: (props: React.HTMLAttributes<HTMLElement>) => <code className="md-code" {...props} />,
   pre: (props: React.HTMLAttributes<HTMLPreElement>) => <CodeBlock {...props} />,
-  table: (props: React.HTMLAttributes<HTMLTableElement>) => <table className="md-table" {...props} />,
+  table: (props: React.HTMLAttributes<HTMLTableElement>) => (
+    <div className="md-table-wrapper">
+      <table className="md-table" {...props} />
+    </div>
+  ),
   th: (props: React.HTMLAttributes<HTMLTableCellElement>) => <th className="md-th" {...props} />,
   td: (props: React.HTMLAttributes<HTMLTableCellElement>) => <td className="md-td" {...props} />,
   hr: (props: React.HTMLAttributes<HTMLHRElement>) => <hr className="md-hr" {...props} />
